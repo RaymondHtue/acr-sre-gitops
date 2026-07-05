@@ -1,0 +1,8 @@
+{
+  "appName": "aws-load-balancer-controller",
+  "helmRepo": "https://aws.github.io/eks-charts",
+  "chart": "aws-load-balancer-controller",
+  "targetRevision": "3.4.0",
+  "valuesPath": "infra-values/aws-lbc",
+  "namespace": "kube-system"
+}

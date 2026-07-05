@@ -1,0 +1,4 @@
+clusterName: accor-resilient-eks-dev
+serviceAccount:
+  create: true
+  name: aws-load-balancer-controller

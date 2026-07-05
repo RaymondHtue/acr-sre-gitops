@@ -1,0 +1,8 @@
+{
+  "appName": "gateway-config",
+  "helmRepo": "https://github.com/RaymondHtue/acr-sre-gitops.git",
+  "chart": "charts/gateway-config",
+  "targetRevision": "HEAD",
+  "valuesPath": "infra-values/alb-gateway-config",
+  "namespace": "default"
+}

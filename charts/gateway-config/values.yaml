@@ -1,0 +1,18 @@
+gatewayClass:
+  name: aws-alb
+  # This must match the AWS Load Balancer Controller
+  controllerName: ingress.k8s.aws/alb
+
+gateway:
+  name: external-gateway
+  namespace: default
+
+  # AWS ALB specific configuration
+  annotations:
+    # Use "internet-facing" for public, "internal" for private
+    alb.ingress.kubernetes.io/scheme: internet-facing
+
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80

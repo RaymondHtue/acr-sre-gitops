@@ -3,3 +3,6 @@ serviceAccount:
   create: true
   name: aws-load-balancer-controller
 vpcId: vpc-08e2e14c921c470c6
+
+featureGates:
+  ALBGatewayAPI: true

@@ -1,7 +1,7 @@
 gatewayClass:
   name: aws-alb
   # This must match the AWS Load Balancer Controller
-  controllerName: ingress.k8s.aws/alb
+  controllerName: gateway.k8s.aws/alb
 
 gateway:
   name: external-gateway

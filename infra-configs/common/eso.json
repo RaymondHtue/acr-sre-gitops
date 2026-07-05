@@ -1,0 +1,8 @@
+{
+  "appName": "eso",
+  "namespace": "external-secrets-system",
+  "helmRepo": "https://charts.external-secrets.io",
+  "chart": "external-secrets",
+  "targetRevision": "2.6.0",
+  "valuesPath": "infra-values/eso"
+}

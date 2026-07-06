@@ -1,0 +1,8 @@
+{
+  "appName": "keda",
+  "helmRepo": "https://kedacore.github.io/charts",
+  "chart": "keda",
+  "targetRevision": "2.16.1",
+  "valuesPath": "infra-values/keda",
+  "namespace": "keda"
+}

@@ -1,0 +1,16 @@
+operator:
+  replicaCount: 1
+
+metricsServer:
+  replicaCount: 1
+
+webhooks:
+  enabled: true
+
+prometheus:
+  metricServer:
+    enabled: true
+  operator:
+    enabled: true
+  webhooks:
+    enabled: true

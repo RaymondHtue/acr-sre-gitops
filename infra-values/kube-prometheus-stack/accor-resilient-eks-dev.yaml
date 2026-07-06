@@ -11,7 +11,7 @@ prometheus:
 
 # ESO resources co-deployed with the stack
 extraManifests:
-  - apiVersion: external-secrets.io/v1beta1
+  - apiVersion: external-secrets.io/v1
     kind: ClusterSecretStore
     metadata:
       name: aws-secrets-manager
@@ -26,7 +26,7 @@ extraManifests:
                 name: external-secrets
                 namespace: external-secrets-system
 
-  - apiVersion: external-secrets.io/v1beta1
+  - apiVersion: external-secrets.io/v1
     kind: ExternalSecret
     metadata:
       name: grafana-admin-secret

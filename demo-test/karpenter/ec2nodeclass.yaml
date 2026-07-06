@@ -1,0 +1,23 @@
+apiVersion: karpenter.k8s.aws/v1
+kind: EC2NodeClass
+metadata:
+  name: default
+spec:
+  # amiFamily replaced by amiSelectorTerms alias in v1 API
+  amiSelectorTerms:
+    - alias: al2023@latest
+
+  role: "KarpenterController-dac85bf4f36cbfce2a99b42572"
+
+  subnetSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: accor-resilient-eks-dev
+
+  securityGroupSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: accor-resilient-eks-dev
+
+  tags:
+    Project: accor-resilient-eks-dev
+    Environment: dev
+    ManagedBy: karpenter

@@ -1,0 +1,53 @@
+grafana:
+  enabled: true
+  admin:
+    existingSecret: grafana-admin-secret
+    userKey: admin-user
+    passwordKey: admin-password
+  ingress:
+    enabled: false
+  persistence:
+    enabled: false
+
+prometheus:
+  prometheusSpec:
+    retention: 15d
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        memory: 2Gi
+    storageSpec: {}
+    tolerations:
+      - key: "karpenter.sh/disruption"
+        operator: "Exists"
+        effect: "NoSchedule"
+
+alertmanager:
+  alertmanagerSpec:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 50Mi
+      limits:
+        memory: 100Mi
+
+prometheusOperator:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      memory: 256Mi
+
+defaultRules:
+  create: true
+  rules:
+    alertmanager: true
+    etcd: false
+    general: true
+    k8s: true
+    kubeApiserver: true
+    kubeScheduler: false
+    node: true

@@ -1,0 +1,8 @@
+{
+  "appName": "kube-prometheus-stack",
+  "helmRepo": "https://prometheus-community.github.io/helm-charts",
+  "chart": "kube-prometheus-stack",
+  "targetRevision": "87.10.1",
+  "valuesPath": "infra-values/kube-prometheus-stack",
+  "namespace": "monitoring"
+}

@@ -1,0 +1,8 @@
+{
+  "appName": "metrics-server",
+  "helmRepo": "https://kubernetes-sigs.github.io/metrics-server/",
+  "chart": "metrics-server",
+  "targetRevision": "3.13.1",
+  "valuesPath": "infra-values/metrics-server",
+  "namespace": "kube-system"
+}

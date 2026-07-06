@@ -41,8 +41,8 @@ spec:
       expireAfter: 720h
 
   limits:
-    cpu: "100"
-    memory: 400Gi
+    cpu: "20"
+    memory: 64Gi
 
   disruption:
     consolidationPolicy: WhenEmptyOrUnderutilized

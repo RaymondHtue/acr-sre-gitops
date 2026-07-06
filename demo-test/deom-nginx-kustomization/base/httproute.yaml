@@ -8,9 +8,9 @@ spec:
   parentRefs:
   - group: gateway.networking.k8s.io
     kind: Gateway
-    name: external-http-gateway
+    name: alb-gateway
     namespace: default
-    sectionName: http-listener
+    sectionName: https
   rules:
     - backendRefs:
       - group: ''

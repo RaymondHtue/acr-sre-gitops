@@ -23,7 +23,7 @@ extraManifests:
           auth:
             jwt:
               serviceAccountRef:
-                name: external-secrets
+                name: eso-external-secrets
                 namespace: external-secrets-system
 
   - apiVersion: external-secrets.io/v1

@@ -102,7 +102,7 @@ Links the IAM role to the ESO controller's Kubernetes service account.
 aws eks create-pod-identity-association \
   --cluster-name accor-resilient-eks-dev \
   --namespace external-secrets-system \
-  --service-account external-secrets \
+  --service-account eso-external-secrets \
   --role-arn arn:aws:iam::<ACCOUNT_ID>:role/accor-eks-dev-eso-role
 ```
 

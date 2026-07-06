@@ -1,0 +1,83 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: accor-infra-apps
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+
+  generators:
+    # Common apps — deploy to ALL clusters
+    - matrix:
+        generators:
+          - git:
+              repoURL: https://github.com/RaymondHtue/acr-sre-gitops.git
+              revision: HEAD
+              files:
+                - path: "infra-configs/common/*.json"
+          - list:
+              elements:
+                - clusterName: accor-resilient-eks-dev
+                  destCluster: https://kubernetes.default.svc
+   # accor-resilient-eks-dev cluser only
+    - matrix:
+        generators:
+          - git:
+              repoURL: https://github.com/RaymondHtue/acr-sre-gitops.git
+              revision: HEAD
+              files:
+                - path: "infra-configs/accor-resilient-eks-dev/*.json"
+          - list:
+              elements:
+                - clusterName: accor-resilient-eks-dev
+                  destCluster: https://kubernetes.default.svc
+
+#    - matrix:
+#        generators:
+#          - git:
+#              repoURL: https://github.com/RaymondHtue/acr-sre-gitops.git
+#              revision: HEAD
+#              files:
+#                - path: "infra-configs/another-cluster/*.json"
+#          - list:
+#              elements:
+#                - clusterName: another-cluster
+#                  destCluster: https://kubernetes.default.svc
+#
+  template:
+    metadata:
+      name: '{{.appName}}-{{.clusterName}}'
+      labels:
+        app-type: infrastructure
+        scope: '{{index .path.segments 1}}'
+    spec:
+      project: default
+
+      sources:
+        - repoURL: https://github.com/RaymondHtue/acr-sre-gitops.git
+          targetRevision: HEAD
+          ref: gitvalues
+
+        - repoURL: '{{.helmRepo}}'
+          path: '{{default "" (index . "chartPath")}}'
+          chart: '{{default "" (index . "chart")}}'
+          targetRevision: '{{.targetRevision}}'
+          helm:
+            releaseName: '{{.appName}}'
+            valueFiles:
+              - '$gitvalues/{{.valuesPath}}/default.yaml'
+              - '$gitvalues/{{.valuesPath}}/{{.clusterName}}.yaml'
+
+      destination:
+        server: '{{.destCluster}}'
+        namespace: '{{.namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - PrunePropagationPolicy=foreground
+          - ServerSideApply=true
+          - Validate=false

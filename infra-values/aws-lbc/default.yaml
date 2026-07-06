@@ -6,3 +6,12 @@ vpcId: vpc-08e2e14c921c470c6
 
 featureGates:
   ALBGatewayAPI: true
+
+gatewayClassConfig:
+  name: accor-aws-alb
+  controllerName: gateway.k8s.aws/alb
+  parametersRef:
+    group: gateway.k8s.aws
+    kind: LoadBalancerConfiguration
+    name: alb-public-ip
+    namespace: default

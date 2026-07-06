@@ -8,7 +8,7 @@ metadata:
 spec:
   # Reference the controller implementation installed in your cluster
   # (e.g., istio.io/gateway-controller, gateway.nginx.org/nginx, envoy)
-  gatewayClassName: aws-alb-accor
+  gatewayClassName: accor-aws-alb
   listeners:
   - name: http-listener
     protocol: HTTP

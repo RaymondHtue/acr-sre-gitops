@@ -7,7 +7,7 @@ spec:
   amiSelectorTerms:
     - alias: al2023@latest
 
-  role: "KarpenterController-dac85bf4f36cbfce2a99b42572"
+  role: "accor-resilient-eks-dev-karpenter-node"
 
   subnetSelectorTerms:
     - tags:

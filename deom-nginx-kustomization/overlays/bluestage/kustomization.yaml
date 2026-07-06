@@ -1,0 +1,66 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+  - namespace.yaml
+
+namespace: testing-stage-blue
+namePrefix: stage-
+nameSuffix: -blue
+
+labels:
+  - includeSelectors: true
+    pairs:
+      environment: stage-blue
+
+patches:
+  - path: deployment-patch.yaml
+  - patch: |-
+      - op: replace
+        path: /spec/hostnames/0
+        value: "stage-nginx-blue.example.com"
+    target:
+      kind: HTTPRoute
+  - patch: |-
+      - op: replace
+        path: /spec/ports/0/targetPort
+        value: 8080
+    target:
+      kind: Service
+  - target:
+      kind: Deployment
+      name:
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/name
+        value: stage-nginx-blue
+
+replacements:
+  - source:
+      kind: Service
+      name: nginx
+      fieldPath: metadata.name
+    targets:
+      - select:
+          kind: HTTPRoute
+          name: nginx-http
+        fieldPaths:
+          - spec.rules.*.backendRefs.*.name
+        options:
+          create: true
+
+replicas:
+  - name: nginx
+    count: 1
+
+images:
+  - name: nginx
+    newName: nginxinc/nginx-unprivileged
+    newTag: "alpine3.23-perl"
+
+configMapGenerator:
+  - name: nginx-default-page
+    behavior: merge
+    files:
+      - index.html=index.html

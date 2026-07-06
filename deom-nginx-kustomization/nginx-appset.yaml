@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  # Without the resources-finalizer.argocd.argoproj.io finalizer, deleting an application will not delete the resources it manages.
+  # To perform a cascading delete, you must add the finalizer. See App Deletion.
+  # Ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/
+  finalizers:
+      - resources-finalizer.argocd.argoproj.io
+  name: nginx-kustomization-appset
+  namespace: argocd
+spec:
+  generators:
+  - git:
+      repoURL: https://github.com/RaymondHtue/gitops-with-k-zero-ess.git
+      revision: HEAD
+      directories:
+       - path: 3-nginx-kustomization/overlays/*
+  template:
+    metadata:
+      name: 'nginx-{{path.basename}}'
+    spec:
+      ignoreDifferences:
+        - group: gateway.networking.k8s.io
+          kind: HTTPRoute
+          managedFieldsManagers:
+            - nginx-gateway
+          jsonPointers:
+            - /status
+      project: default
+      source:
+        repoURL:  https://github.com/RaymondHtue/gitops-with-k-zero-ess.git
+        targetRevision: HEAD
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+#        namespace: 'nginx-{{index .path.segments 2}}-{{path.basename}}' # namespace can use create by argo generator define in kustomize
+      syncPolicy:
+        automated:
+          enabled: true
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+          - PrunePropagationPolicy=foreground
+          - Validate=false
+          - RespectIgnoreDifferences=true

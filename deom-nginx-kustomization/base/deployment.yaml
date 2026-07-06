@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx
+  name: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - image: nginx:alpine
+        name: nginx
+        securityContext:
+           allowPrivilegeEscalation: false
+           readOnlyRootFilesystem: true
+           capabilities:
+             drop:
+               - ALL
+        resources:
+           requests:
+             cpu: "100m"
+             memory: "16Mi"
+           limits:
+             cpu: "200m"
+             memory: "8Mi"
+        startupProbe:
+          httpGet:
+            path: /
+            port: 8080
+          periodSeconds: 3
+          failureThreshold: 3
+          timeoutSeconds: 2
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 3
+        volumeMounts:
+          - name: nginx-default-page
+            mountPath: /usr/share/nginx/html/index.html
+            subPath: index.html
+          - name: tmp
+            mountPath: /tmp
+      volumes:
+        - name: nginx-default-page
+          configMap:
+            name: nginx-default-page
+            items:
+              - key: index.html
+                path: index.html
+        - name: tmp
+          emptyDir: {}

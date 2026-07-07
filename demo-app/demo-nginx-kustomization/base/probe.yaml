@@ -1,0 +1,23 @@
+# end-to-end probe (client -> ALB/Gateway -> nginx) that produces the
+# raw SLIs: probe_success (availability) and probe_duration_seconds (latency).
+# Scraped by kube-prometheus-stack's Prometheus (matches release label).
+# Overlays patch the target hostname to their own HTTPRoute host.
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: nginx-blackbox
+  labels:
+    release: kube-prometheus-stack
+spec:
+  jobName: nginx-blackbox
+  interval: 15s
+  scrapeTimeout: 10s
+  module: http_2xx
+  prober:
+    url: blackbox-exporter.monitoring.svc.cluster.local:9115
+  targets:
+    staticConfig:
+      static:
+        - https://nginx01.maunghtoo.cloud   # overlays override this
+      labels:
+        slo_service: demo-app

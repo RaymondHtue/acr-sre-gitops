@@ -1,0 +1,8 @@
+{
+  "appName": "blackbox-exporter",
+  "helmRepo": "https://prometheus-community.github.io/helm-charts",
+  "chart": "prometheus-blackbox-exporter",
+  "targetRevision": "11.15.1",
+  "valuesPath": "infra-values/blackbox-exporter",
+  "namespace": "monitoring"
+}

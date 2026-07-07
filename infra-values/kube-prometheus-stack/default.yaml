@@ -8,6 +8,12 @@ grafana:
     enabled: false
   persistence:
     enabled: false
+  # Discover dashboard ConfigMaps (label grafana_dashboard=1) in every
+  # namespace, so app teams can ship dashboards alongside their app
+  # (e.g. demo-app's SLO dashboard in the testing-* namespaces).
+  sidecar:
+    dashboards:
+      searchNamespace: ALL
 
 prometheus:
   prometheusSpec:

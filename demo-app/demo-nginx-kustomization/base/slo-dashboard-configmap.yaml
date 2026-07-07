@@ -1,0 +1,195 @@
+# Grafana dashboard for the demo-app SLO. Auto-loaded by the kube-prometheus-stack
+# grafana sidecar via the grafana_dashboard label (searchNamespace: ALL).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: demo-app-slo-dashboard
+  labels:
+    grafana_dashboard: "1"
+data:
+  demo-app-slo.json: |
+    {
+      "title": "demo-app · SLO / SLI",
+      "uid": "demo-app-slo",
+      "schemaVersion": 39,
+      "editable": true,
+      "time": { "from": "now-24h", "to": "now" },
+      "refresh": "30s",
+      "templating": {
+        "list": [
+          {
+            "name": "datasource",
+            "type": "datasource",
+            "query": "prometheus",
+            "current": {},
+            "hide": 0
+          }
+        ]
+      },
+      "panels": [
+        {
+          "type": "stat",
+          "title": "Availability SLI (30d)",
+          "gridPos": { "h": 5, "w": 6, "x": 0, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percentunit",
+              "decimals": 4,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "yellow", "value": 0.99 },
+                  { "color": "green", "value": 0.995 }
+                ]
+              }
+            }
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": { "type": "prometheus", "uid": "${datasource}" },
+              "expr": "avg_over_time(probe_success{slo_service=\"demo-app\"}[30d])"
+            }
+          ]
+        },
+        {
+          "type": "stat",
+          "title": "SLO target",
+          "gridPos": { "h": 5, "w": 6, "x": 6, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "fieldConfig": { "defaults": { "unit": "percentunit", "decimals": 3, "color": { "mode": "fixed", "fixedColor": "blue" } } },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": { "type": "prometheus", "uid": "${datasource}" },
+              "expr": "slo:demo_app_availability:target"
+            }
+          ]
+        },
+        {
+          "type": "stat",
+          "title": "Error budget remaining (30d)",
+          "gridPos": { "h": 5, "w": 6, "x": 12, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percentunit",
+              "decimals": 1,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "yellow", "value": 0.25 },
+                  { "color": "green", "value": 0.5 }
+                ]
+              }
+            }
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": { "type": "prometheus", "uid": "${datasource}" },
+              "expr": "1 - ((1 - avg_over_time(probe_success{slo_service=\"demo-app\"}[30d])) / 0.005)"
+            }
+          ]
+        },
+        {
+          "type": "stat",
+          "title": "Latency SLI <300ms (1h)",
+          "gridPos": { "h": 5, "w": 6, "x": 18, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percentunit",
+              "decimals": 3,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "yellow", "value": 0.9 },
+                  { "color": "green", "value": 0.95 }
+                ]
+              }
+            }
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": { "type": "prometheus", "uid": "${datasource}" },
+              "expr": "sli:demo_app_latency_under300ms:ratio_rate1h"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Availability (5m ratio) vs SLO",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 5 },
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0.9, "max": 1 } },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": { "type": "prometheus", "uid": "${datasource}" },
+              "expr": "sli:demo_app_availability:ratio_rate5m",
+              "legendFormat": "availability 5m"
+            },
+            {
+              "refId": "B",
+              "datasource": { "type": "prometheus", "uid": "${datasource}" },
+              "expr": "slo:demo_app_availability:target",
+              "legendFormat": "SLO 99.5%"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Probe latency (p50 / p90, 5m)",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 5 },
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "fieldConfig": { "defaults": { "unit": "s" } },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": { "type": "prometheus", "uid": "${datasource}" },
+              "expr": "quantile_over_time(0.5, probe_duration_seconds{slo_service=\"demo-app\"}[5m])",
+              "legendFormat": "p50"
+            },
+            {
+              "refId": "B",
+              "datasource": { "type": "prometheus", "uid": "${datasource}" },
+              "expr": "quantile_over_time(0.9, probe_duration_seconds{slo_service=\"demo-app\"}[5m])",
+              "legendFormat": "p90"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Availability error-budget burn rate (1h, multiples of budget)",
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 13 },
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "none",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "yellow", "value": 3 },
+                  { "color": "red", "value": 14.4 }
+                ]
+              }
+            }
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": { "type": "prometheus", "uid": "${datasource}" },
+              "expr": "(1 - sli:demo_app_availability:ratio_rate1h) / 0.005",
+              "legendFormat": "burn rate (1h)"
+            }
+          ]
+        }
+      ]
+    }

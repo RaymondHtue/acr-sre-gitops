@@ -35,6 +35,13 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/name
         value: stage-nginx-green
+  - target:
+      kind: ScaledObject
+      name: nginx-scaledobject
+    patch: |-
+      - op: replace
+        path: /spec/scaleTargetRef/name
+        value: stage-nginx-green
 
 replacements:
   - source:

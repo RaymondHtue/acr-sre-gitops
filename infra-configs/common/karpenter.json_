@@ -1,8 +1,0 @@
-{
-    "appName": "karpenter",
-    "helmRepo": "oci://public.ecr.aws/karpenter/karpenter",
-    "chart": "karpenter",
-    "targetRevision": "1.13.0",
-    "valuesPath": "infra-values/karpenter",
-    "namespace": "kube-system"
-}

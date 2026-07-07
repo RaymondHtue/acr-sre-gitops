@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: nginx-servicemonitor
+  labels:
+    # Required for kube-prometheus-stack's Prometheus to discover this
+    # ServiceMonitor (its serviceMonitorSelector matches release=kube-prometheus-stack).
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nginx
+  endpoints:
+    - port: metrics
+      interval: 15s
+      path: /metrics

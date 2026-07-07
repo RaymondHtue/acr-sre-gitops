@@ -5,6 +5,9 @@ resources:
   - deployment.yaml
   - service.yaml
   - httproute.yaml
+  - nginx-stub-status-conf.yaml
+  - servicemonitor.yaml
+  - scaledobject.yaml
 
 configMapGenerator:
   - name: nginx-default-page

@@ -1,0 +1,43 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: load-generator
+spec:
+  backoffLimit: 1
+  ttlSecondsAfterFinished: 600
+  template:
+    spec:
+      restartPolicy: Never
+      # Phases must run in sequence (baseline -> spike -> sustain -> cooldown).
+      # Containers in a pod all start at once, so phases 1-3 are initContainers
+      # (run to completion, in order); phase 4 is the main container that runs last.
+      initContainers:
+        - name: phase1-baseline
+          image: williamyeh/hey:latest
+          args:
+            - -z=120s
+            - -c=10
+            - -q=50
+            - http://nginx-dev.testing-dev.svc.cluster.local
+        - name: phase2-spike
+          image: williamyeh/hey:latest
+          args:
+            - -z=180s
+            - -c=50
+            - -q=500
+            - http://nginx-dev.testing-dev.svc.cluster.local
+        - name: phase3-sustain
+          image: williamyeh/hey:latest
+          args:
+            - -z=120s
+            - -c=50
+            - -q=500
+            - http://nginx-dev.testing-dev.svc.cluster.local
+      containers:
+        - name: phase4-cooldown
+          image: williamyeh/hey:latest
+          args:
+            - -z=180s
+            - -c=10
+            - -q=50
+            - http://nginx-dev.testing-dev.svc.cluster.local

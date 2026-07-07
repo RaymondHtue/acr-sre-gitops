@@ -11,10 +11,10 @@ metadata:
 spec:
   generators:
   - git:
-      repoURL: https://github.com/RaymondHtue/gitops-with-k-zero-ess.git
+      repoURL: https://github.com/RaymondHtue/acr-sre-gitops.git
       revision: HEAD
       directories:
-       - path: 3-nginx-kustomization/overlays/*
+       - path: demo-app/demo-nginx-kustomization/overlays/*
   template:
     metadata:
       name: 'nginx-{{path.basename}}'
@@ -28,7 +28,7 @@ spec:
             - /status
       project: default
       source:
-        repoURL:  https://github.com/RaymondHtue/gitops-with-k-zero-ess.git
+        repoURL:  https://github.com/RaymondHtue/acr-sre-gitops.git
         targetRevision: HEAD
         path: '{{path}}'
       destination:
@@ -41,7 +41,7 @@ spec:
           selfHeal: true
         syncOptions:
           - CreateNamespace=true
-          - ServerSideApply=true
+#          - ServerSideApply=true
           - PrunePropagationPolicy=foreground
           - Validate=false
           - RespectIgnoreDifferences=true

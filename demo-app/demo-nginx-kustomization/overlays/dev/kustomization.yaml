@@ -3,23 +3,22 @@ kind: Kustomization
 
 resources:
   - ../../base
-  - namespace.yaml
+  - ./namespace.yaml
 
-namespace: testing-stage-blue
-namePrefix: stage-
-nameSuffix: -blue
+namespace: testing-dev
+nameSuffix: -dev
 
 labels:
   - includeSelectors: true
     pairs:
-      environment: stage-blue
+      environment: dev
 
 patches:
   - path: deployment-patch.yaml
   - patch: |-
       - op: replace
         path: /spec/hostnames/0
-        value: "stage-nginx-blue.example.com"
+        value: "traffic.maunghtoo.cloud"
     target:
       kind: HTTPRoute
   - patch: |-
@@ -34,7 +33,14 @@ patches:
     patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/name
-        value: stage-nginx-blue
+        value: nginx-dev
+  - target:
+      kind: ScaledObject
+      name: nginx-scaledobject
+    patch: |-
+      - op: replace
+        path: /spec/scaleTargetRef/name
+        value: nginx-dev
 
 replacements:
   - source:
@@ -58,7 +64,6 @@ images:
   - name: nginx
     newName: nginxinc/nginx-unprivileged
     newTag: "alpine3.23-perl"
-
 configMapGenerator:
   - name: nginx-default-page
     behavior: merge

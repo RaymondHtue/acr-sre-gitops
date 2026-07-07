@@ -224,7 +224,6 @@ data:
     remoteRef:
       key: accor-resilient-eks-dev/grafana
       property: admin-password
-  # add more fields from the same secret, or a different secret key entirely
   - secretKey: smtp-password
     remoteRef:
       key: accor-resilient-eks-dev/grafana-smtp

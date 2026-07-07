@@ -5,7 +5,7 @@ resources:
   - ../../base
   - ./namespace.yaml
 
-namespace: testing-stage-green
+namespace: testing-green
 namePrefix: stage-
 nameSuffix: -green
 
@@ -19,7 +19,7 @@ patches:
   - patch: |-
       - op: replace
         path: /spec/hostnames/0
-        value: "stage-nginx-green.example.com"
+        value: "traffic-green.maunghtoo.cloud"
     target:
       kind: HTTPRoute
   - patch: |-

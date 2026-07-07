@@ -20,12 +20,13 @@ spec:
       name: 'nginx-{{path.basename}}'
     spec:
       ignoreDifferences:
-        - group: gateway.networking.k8s.io
-          kind: HTTPRoute
-          managedFieldsManagers:
-            - nginx-gateway
-          jsonPointers:
-            - /status
+# only for nginx gateway fabric
+#        - group: gateway.networking.k8s.io
+#          kind: HTTPRoute
+#          managedFieldsManagers:
+#            - nginx-gateway
+#          jsonPointers:
+#            - /status
       project: default
       source:
         repoURL:  https://github.com/RaymondHtue/acr-sre-gitops.git

@@ -4,6 +4,11 @@ kind: Kustomization
 resources:
   - ../../base
   - ./namespace.yaml
+  # Single, namespace-aware SLO dashboard — deployed once here (not in base) so
+  # its fixed uid isn't duplicated across the blue/green overlays. The Grafana
+  # sidecar reads it cluster-wide (searchNamespace: ALL) and its $namespace var
+  # covers testing-.*, so it still shows blue/green data.
+  - ./slo-dashboard-configmap.yaml
 
 namespace: testing-dev
 nameSuffix: -dev

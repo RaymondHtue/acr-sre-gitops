@@ -24,6 +24,12 @@ patches:
       kind: HTTPRoute
   - patch: |-
       - op: replace
+        path: /spec/targets/staticConfig/static/0
+        value: "https://traffic-green.maunghtoo.cloud"
+    target:
+      kind: Probe
+  - patch: |-
+      - op: replace
         path: /spec/ports/0/targetPort
         value: 8080
     target:

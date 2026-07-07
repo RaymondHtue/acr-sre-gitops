@@ -1,15 +1,25 @@
 # SLO definition for demo-app as Prometheus recording + alerting rules.
+# Targets are aligned with the design doc ("The Redemption", Section 5).
 #
 # SLIs (raw signals from the blackbox Probe, label slo_service="demo-app"):
 #   availability = probe_success                (1 = a 2xx response was served)
 #   latency      = probe_duration_seconds       (total end-to-end request time)
 #
 # SLO targets:
-#   Availability: 99.5% of probes succeed        (error budget = 0.5%)
-#   Latency:      95% of probes  < 300 ms
+#   Availability: 99.9% of probes succeed        (error budget = 0.1% ≈ 43m/30d)
+#   Latency:      p95 of probe_duration < 200 ms
+#   Error rate:   real 5xx / total < 0.5%        (SEE NOTE below)
 #
-# SLA (external contract): 99.0% availability — looser than the SLO on purpose,
-#   so the error-budget burn alerts below fire well before the SLA is breached.
+# SLA (external contract): 99.5% availability — looser than the 99.9% SLO on
+#   purpose, so the burn alerts below fire well before the SLA is breached.
+#
+# NOTE on the error-rate SLO: a *real* 5xx-rate SLI needs request-level metrics
+# with HTTP status codes. nginx stub_status (the current exporter) exposes only
+# connection/request counts, and the blackbox probe only reports 2xx-or-not for
+# synthetic requests. Until a status-aware source exists (ALB access-log metrics
+# to CloudWatch, or a status-code exporter), the availability SLI below is the
+# proxy for error rate (probe non-2xx = 1 - probe_success). Wire real 5xx before
+# treating error-rate as independently measured.
 #
 # Alerting: Google-SRE multi-window, multi-burn-rate on the availability budget.
 apiVersion: monitoring.coreos.com/v1
@@ -40,31 +50,31 @@ spec:
           expr: avg_over_time(probe_success{slo_service="demo-app"}[3d])
         # The SLO target and error budget, published as series for dashboards.
         - record: slo:demo_app_availability:target
-          expr: vector(0.995)
+          expr: vector(0.999)
         - record: slo:demo_app_availability:error_budget
-          expr: vector(0.005)
+          expr: vector(0.001)
 
-    # ---- Latency SLI: fraction of probes under the 300ms threshold -----------
+    # ---- Latency SLI: p95 of end-to-end probe duration -----------------------
     - name: demo-app.slo.latency.sli
       interval: 30s
       rules:
-        - record: sli:demo_app_latency_under300ms:ratio_rate5m
-          expr: avg_over_time((probe_duration_seconds{slo_service="demo-app"} < bool 0.3)[5m:15s])
-        - record: sli:demo_app_latency_under300ms:ratio_rate1h
-          expr: avg_over_time((probe_duration_seconds{slo_service="demo-app"} < bool 0.3)[1h:15s])
-        - record: slo:demo_app_latency:target
-          expr: vector(0.95)
+        - record: sli:demo_app_latency_p95:seconds_rate5m
+          expr: quantile_over_time(0.95, probe_duration_seconds{slo_service="demo-app"}[5m])
+        - record: sli:demo_app_latency_p95:seconds_rate1h
+          expr: quantile_over_time(0.95, probe_duration_seconds{slo_service="demo-app"}[1h])
+        - record: slo:demo_app_latency_p95:target_seconds
+          expr: vector(0.2)
 
     # ---- Multi-window multi-burn-rate alerts on the availability budget ------
-    # Threshold = burn_rate * error_budget(0.005). Both windows must breach.
+    # Threshold = burn_rate * error_budget(0.001). Both windows must breach.
     - name: demo-app.slo.availability.alerts
       rules:
         - alert: DemoAppAvailabilityErrorBudgetBurnFast
           # 14.4x burn: ~2% of the 30d budget in 1h. Long=1h, short=5m.
           expr: |
-            (1 - sli:demo_app_availability:ratio_rate1h) > (14.4 * 0.005)
+            (1 - sli:demo_app_availability:ratio_rate1h) > (14.4 * 0.001)
             and
-            (1 - sli:demo_app_availability:ratio_rate5m) > (14.4 * 0.005)
+            (1 - sli:demo_app_availability:ratio_rate5m) > (14.4 * 0.001)
           for: 2m
           labels:
             severity: critical
@@ -72,14 +82,14 @@ spec:
             burn_rate: fast
           annotations:
             summary: "demo-app burning availability budget fast (14.4x)"
-            description: "Availability error rate over 1h and 5m exceeds 14.4x the 99.5% SLO budget. At this rate the 30-day budget is gone in ~2 days."
+            description: "Availability error rate over 1h and 5m exceeds 14.4x the 99.9% SLO budget. At this rate the 30-day budget (~43m) is gone in ~2 days."
 
         - alert: DemoAppAvailabilityErrorBudgetBurnMedium
           # 6x burn: ~5% of the 30d budget in 6h. Long=6h, short=30m.
           expr: |
-            (1 - sli:demo_app_availability:ratio_rate6h) > (6 * 0.005)
+            (1 - sli:demo_app_availability:ratio_rate6h) > (6 * 0.001)
             and
-            (1 - sli:demo_app_availability:ratio_rate30m) > (6 * 0.005)
+            (1 - sli:demo_app_availability:ratio_rate30m) > (6 * 0.001)
           for: 5m
           labels:
             severity: critical
@@ -87,14 +97,14 @@ spec:
             burn_rate: medium
           annotations:
             summary: "demo-app burning availability budget (6x)"
-            description: "Availability error rate over 6h and 30m exceeds 6x the 99.5% SLO budget."
+            description: "Availability error rate over 6h and 30m exceeds 6x the 99.9% SLO budget."
 
         - alert: DemoAppAvailabilityErrorBudgetBurnSlow
           # 3x burn: ~10% of the 30d budget in 1d. Long=1d, short=2h.
           expr: |
-            (1 - sli:demo_app_availability:ratio_rate1d) > (3 * 0.005)
+            (1 - sli:demo_app_availability:ratio_rate1d) > (3 * 0.001)
             and
-            (1 - sli:demo_app_availability:ratio_rate2h) > (3 * 0.005)
+            (1 - sli:demo_app_availability:ratio_rate2h) > (3 * 0.001)
           for: 15m
           labels:
             severity: warning
@@ -102,17 +112,17 @@ spec:
             burn_rate: slow
           annotations:
             summary: "demo-app slowly burning availability budget (3x)"
-            description: "Availability error rate over 1d and 2h exceeds 3x the 99.5% SLO budget."
+            description: "Availability error rate over 1d and 2h exceeds 3x the 99.9% SLO budget."
 
     # ---- Latency SLO alert ---------------------------------------------------
     - name: demo-app.slo.latency.alerts
       rules:
         - alert: DemoAppLatencySLOBreach
-          expr: sli:demo_app_latency_under300ms:ratio_rate1h < 0.95
+          expr: sli:demo_app_latency_p95:seconds_rate1h > 0.2
           for: 10m
           labels:
             severity: warning
             slo: demo-app-latency
           annotations:
             summary: "demo-app latency SLO at risk"
-            description: "Fewer than 95% of probes over the last 1h completed under 300ms."
+            description: "p95 probe latency over the last 1h exceeds the 200ms SLO."

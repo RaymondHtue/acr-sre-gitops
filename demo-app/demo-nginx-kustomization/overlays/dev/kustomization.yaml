@@ -9,6 +9,8 @@ resources:
   # sidecar reads it cluster-wide (searchNamespace: ALL) and its $namespace var
   # covers testing-.*, so it still shows blue/green data.
   - ./slo-dashboard-configmap.yaml
+  # Default-deny NetworkPolicy for the nginx pods, scoped to this overlay.
+  - ./networkpolicy.yaml
 
 namespace: testing-dev
 nameSuffix: -dev

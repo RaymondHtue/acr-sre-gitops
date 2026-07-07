@@ -1,16 +1,6 @@
 # Single, namespace-aware Grafana dashboard for the demo-app SLO. Auto-loaded by
 # the kube-prometheus-stack grafana sidecar via the grafana_dashboard label
 # (searchNamespace: ALL).
-#
-# Deployed ONCE (referenced only by the dev overlay, not the kustomize base) so
-# there is a single ConfigMap with uid "demo-app-slo" — avoids the sidecar uid
-# collision that happens if a fixed-uid dashboard is emitted per overlay.
-#
-# The $namespace template var covers every demo-app environment (testing-.*), so
-# one dashboard serves dev today and compares blue/green during rollouts. The
-# probe/recording-rule series keep their `namespace` label (avg_over_time /
-# quantile_over_time do not aggregate it away), so every panel splits by
-# legendFormat "{{namespace}}".
 apiVersion: v1
 kind: ConfigMap
 metadata:

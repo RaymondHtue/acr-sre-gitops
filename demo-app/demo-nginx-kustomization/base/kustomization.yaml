@@ -10,6 +10,7 @@ resources:
   - scaledobject.yaml
   - probe.yaml
   - slo-rules.yaml
+  - pdb.yaml
   # slo-dashboard-configmap.yaml is intentionally NOT here — it carries a fixed
   # dashboard uid, so it must be deployed exactly once (via the dev overlay),
   # not per-overlay. See overlays/dev/kustomization.yaml.

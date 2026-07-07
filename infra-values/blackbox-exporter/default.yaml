@@ -31,8 +31,6 @@ config:
         tls_config:
           insecure_skip_verify: false # ALB serves a valid ACM cert
 
-# We create the Probe CR ourselves (in the demo-app kustomize base) so the
-# chart's own serviceMonitor/prometheusRule scaffolding stays off.
 serviceMonitor:
   enabled: false
 prometheusRule:

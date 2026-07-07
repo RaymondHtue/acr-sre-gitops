@@ -1,0 +1,15 @@
+# Protects demo-app availability during VOLUNTARY disruptions (node drains,
+# Karpenter consolidation, spot-reclaim handling). Pairs with the topology
+# spread constraints in deployment.yaml.
+#
+# Namespace-scoped: each overlay (dev/blue/green) gets its own PDB selecting the
+# app:nginx pods in its own namespace.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: nginx-pdb
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: nginx

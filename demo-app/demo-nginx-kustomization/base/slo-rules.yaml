@@ -1,27 +1,3 @@
-# SLO definition for demo-app as Prometheus recording + alerting rules.
-# Targets are aligned with the design doc ("The Redemption", Section 5).
-#
-# SLIs (raw signals from the blackbox Probe, label slo_service="demo-app"):
-#   availability = probe_success                (1 = a 2xx response was served)
-#   latency      = probe_duration_seconds       (total end-to-end request time)
-#
-# SLO targets:
-#   Availability: 99.9% of probes succeed        (error budget = 0.1% ≈ 43m/30d)
-#   Latency:      p95 of probe_duration < 200 ms
-#   Error rate:   real 5xx / total < 0.5%        (SEE NOTE below)
-#
-# SLA (external contract): 99.5% availability — looser than the 99.9% SLO on
-#   purpose, so the burn alerts below fire well before the SLA is breached.
-#
-# NOTE on the error-rate SLO: a *real* 5xx-rate SLI needs request-level metrics
-# with HTTP status codes. nginx stub_status (the current exporter) exposes only
-# connection/request counts, and the blackbox probe only reports 2xx-or-not for
-# synthetic requests. Until a status-aware source exists (ALB access-log metrics
-# to CloudWatch, or a status-code exporter), the availability SLI below is the
-# proxy for error rate (probe non-2xx = 1 - probe_success). Wire real 5xx before
-# treating error-rate as independently measured.
-#
-# Alerting: Google-SRE multi-window, multi-burn-rate on the availability budget.
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:

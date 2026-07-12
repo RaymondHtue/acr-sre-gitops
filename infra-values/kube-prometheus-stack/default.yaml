@@ -32,12 +32,41 @@ prometheus:
 
 alertmanager:
   alertmanagerSpec:
+    # Mounts the ESO-managed secret at
+    # /etc/alertmanager/secrets/alertmanager-smtp/smtp-password
+    secrets:
+      - alertmanager-smtp
     resources:
       requests:
         cpu: 50m
         memory: 50Mi
       limits:
         memory: 100Mi
+  config:
+    global:
+      smtp_smarthost: 'smtp.gmail.com:587'
+      smtp_from: 'raymondhtue@gmail.com'
+      smtp_auth_username: 'raymondhtue@gmail.com'
+      smtp_auth_identity: 'raymondhtue@gmail.com'
+      # Gmail app-password, read from the mounted ESO secret (never in git)
+      smtp_auth_password_file: /etc/alertmanager/secrets/alertmanager-smtp/smtp-password
+      smtp_require_tls: true
+    route:
+      group_by: ['namespace', 'alertname']
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 4h
+      receiver: 'google-smtp'
+      routes:
+        - receiver: "google-smtp"
+          match_re:
+              severity: critical|warning
+          continue: true
+    receivers:
+      - name: 'google-smtp'
+        email_configs:
+          - to: 'raymondhtue@outlook.com'
+            send_resolved: true
 
 prometheusOperator:
   resources:
@@ -46,6 +75,34 @@ prometheusOperator:
       memory: 128Mi
     limits:
       memory: 256Mi
+
+additionalPrometheusRulesMap:
+  node-resource-alerts:
+    groups:
+      - name: node-resource-usage
+# Reuse the node-exporter mixin recording rules (already shipped by
+# kube-prometheus-stack) node_uname_info join adds the nodename label for readable emails.
+        rules:
+          - alert: NodeHighCPUUsage
+            expr: |
+              instance:node_cpu_utilisation:rate5m
+                * on(instance) group_left(nodename) node_uname_info{nodename=~".+"} > 0.8
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "High CPU usage on {{ $labels.nodename }}"
+              description: "CPU usage {{ $value | humanizePercentage }} (>80%) on {{ $labels.nodename }} for 5m."
+          - alert: NodeHighMemoryUsage
+            expr: |
+              instance:node_memory_utilisation:ratio
+                * on(instance) group_left(nodename) node_uname_info{nodename=~".+"} > 0.8
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "High memory usage on {{ $labels.nodename }}"
+              description: "Memory usage {{ $value | humanizePercentage }} (>80%) on {{ $labels.nodename }} for 5m."
 
 defaultRules:
   create: true

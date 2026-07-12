@@ -37,3 +37,24 @@ extraManifests:
           remoteRef:
             key: accor-resilient-eks-dev/grafana
             property: admin-password
+
+  # Gmail SMTP app-password for Alertmanager email notifications.
+  # Mounted into the Alertmanager pod via alertmanager.alertmanagerSpec.secrets
+  - apiVersion: external-secrets.io/v1
+    kind: ExternalSecret
+    metadata:
+      name: alertmanager-smtp
+      namespace: monitoring
+    spec:
+      refreshInterval: 1h
+      secretStoreRef:
+        name: aws-secrets-manager
+        kind: ClusterSecretStore
+      target:
+        name: alertmanager-smtp
+        creationPolicy: Owner
+      data:
+        - secretKey: smtp-password
+          remoteRef:
+            key: accor-resilient-eks-dev/alertmanager-smtp
+            property: smtp-password

@@ -18,6 +18,12 @@ spec:
       - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: monitoring
+      # AWS LBC runs the ALB in IP-target mode: health checks and client
+      # traffic  comes from the ALB ENIs (VPC CIDR), no namespaceSelector can match them. Without this ipBlock the ALB health
+      # check times out -> target unhealthy -> 504. Covers node-IP kubelet
+      # probes too.
+      - ipBlock:
+            cidr: 10.0.0.0/16
       ports:
         - port: 8080
           protocol: TCP

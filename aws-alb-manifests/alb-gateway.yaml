@@ -1,0 +1,31 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: alb-gateway
+  namespace: default
+  annotations:
+    # Optional: Force HTTP to HTTPS redirect
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    # alb.ingress.kubernetes.io/ssl-redirect: '443'
+spec:
+  gatewayClassName: accor-aws-alb
+  listeners:
+  - name: http
+    protocol: HTTP
+    hostname: "*.maunghtoo.cloud"
+    port: 80
+    allowedRoutes:
+      namespaces:
+        from: All
+  - name: https
+    protocol: HTTPS
+    port: 443
+    hostname: "*.maunghtoo.cloud"
+    tls:
+      mode: Terminate
+      options:
+        # The AWS controller specific annotation for ACM
+        alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:635867291850:certificate/dceb3f84-2485-4767-bfb3-69ff41f15e9a
+    allowedRoutes:
+      namespaces:
+        from: All

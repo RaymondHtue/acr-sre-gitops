@@ -1,0 +1,9 @@
+apiVersion: gateway.k8s.aws/v1beta1
+kind: LoadBalancerConfiguration
+metadata:
+  name: alb-public-ip
+  namespace: default
+spec:
+  scheme: internet-facing
+  defaultTargetGroupConfiguration:
+    name: tg-ip-target

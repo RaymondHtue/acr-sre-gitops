@@ -11,8 +11,17 @@ spec:
     - Ingress
     - Egress
   ingress:
-    - ports:
+    - from:
+      - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: default
+      - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
         - port: 8080
+          protocol: TCP
+        - port: 80
           protocol: TCP
     # Exporter /metrics on 9113. Prometheus
     # kubelet probes it from the node IP
@@ -29,4 +38,16 @@ spec:
         - port: 53
           protocol: UDP
         - port: 53
+          protocol: TCP
+    # Allow pods in this namespace to reach the nginx service (intra-namespace).
+    # Without this, egress default-deny blocks client->nginx on 80/8080 even
+    # though ingress permits it.
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: testing-dev
+      ports:
+        - port: 80
+          protocol: TCP
+        - port: 8080
           protocol: TCP

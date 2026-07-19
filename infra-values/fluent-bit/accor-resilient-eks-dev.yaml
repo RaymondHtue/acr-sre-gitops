@@ -1,0 +1,2 @@
+# Cluster-scoped overrides for accor-resilient-eks-dev.
+# (Both files must exist for the ApplicationSet even if this is empty.)

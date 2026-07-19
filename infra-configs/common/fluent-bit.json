@@ -1,0 +1,8 @@
+{
+  "appName": "fluent-bit",
+  "helmRepo": "https://fluent.github.io/helm-charts",
+  "chart": "fluent-bit",
+  "targetRevision": "0.57.9",
+  "valuesPath": "infra-values/fluent-bit",
+  "namespace": "monitoring"
+}

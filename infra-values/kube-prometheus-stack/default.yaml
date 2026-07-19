@@ -15,6 +15,21 @@ grafana:
     dashboards:
       searchNamespace: ALL
 
+  # Tempo (traces) as extra datasource. In-cluster URL, no auth - the chart's
+  # Prometheus datasource keeps uid "prometheus".
+  additionalDataSources:
+    - name: Tempo
+      type: tempo
+      uid: tempo
+      access: proxy
+      url: http://tempo.monitoring.svc.cluster.local:3200
+      jsonData:
+        # Build the service graph from Prometheus span metrics.
+        serviceMap:
+          datasourceUid: prometheus
+        nodeGraph:
+          enabled: true
+
 prometheus:
   prometheusSpec:
     retention: 15d

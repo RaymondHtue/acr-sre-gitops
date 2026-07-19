@@ -1,0 +1,21 @@
+# Trace backend for OTLP. S3 storage via Pod Identity, no static AWS keys.
+serviceAccount:
+  create: true
+  # Must match tempo_service_account in acp-aws-eks/us-east-1/dev/s3/terragrunt.hcl
+  name: tempo
+
+# Stateless - trace blocks land in S3, the WAL is transient scratch.
+persistence:
+  enabled: false
+
+# Chart default receivers already expose OTLP on 4317/4318 (plus jaeger/zipkin).
+tempo:
+  storage:
+    trace:
+      backend: s3
+
+# Tolerate Karpenter disruption like the rest of the monitoring stack.
+tolerations:
+  - key: "karpenter.sh/disruption"
+    operator: "Exists"
+    effect: "NoSchedule"

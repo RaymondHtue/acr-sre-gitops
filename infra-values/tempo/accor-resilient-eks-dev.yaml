@@ -1,0 +1,9 @@
+# Must match bucket_name + tempo_object_prefix in acp-aws-eks/us-east-1/dev/s3/terragrunt.hcl.
+tempo:
+  storage:
+    trace:
+      s3:
+        bucket: accor-resilient-eks-dev-observability-635867291850
+        endpoint: s3.us-east-1.amazonaws.com
+        region: us-east-1
+        prefix: tempo

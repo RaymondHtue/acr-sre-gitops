@@ -33,6 +33,8 @@ grafana:
 prometheus:
   prometheusSpec:
     retention: 15d
+    # Accept remote_write so Tempo's metrics-generator can push RED/service-graph metrics.
+    enableRemoteWriteReceiver: true
     resources:
       requests:
         cpu: 200m

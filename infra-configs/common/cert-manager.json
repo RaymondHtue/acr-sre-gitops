@@ -1,0 +1,8 @@
+{
+  "appName": "cert-manager",
+  "helmRepo": "https://charts.jetstack.io",
+  "chart": "cert-manager",
+  "targetRevision": "v1.21.0",
+  "valuesPath": "infra-values/cert-manager",
+  "namespace": "cert-manager"
+}

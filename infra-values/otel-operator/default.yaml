@@ -1,18 +1,10 @@
 # Provides the OpenTelemetryCollector CRD + controller.
-# No cert-manager  - operator self-signs the webhook cert.
+# Webhook cert issued in-cluster by cert-manager (deterministic under ArgoCD).
+# autoGenerateCert regenerates a fresh CA on every repo-server render - drifts. Do not use.
 admissionWebhooks:
   certManager:
-    enabled: false
-  autoGenerateCert:
     enabled: true
+  autoGenerateCert:
+    enabled: false
 
-# collectorImage default (opentelemetry-collector-k8s) already set by chart,
-
-rbac:
-  create: true
-  extraClusterRules:
-    - apiGroups: ["admissionregistration.k8s.io"]
-      resources:
-        - mutatingwebhookconfigurations
-        - validatingwebhookconfigurations
-      verbs: ["get", "list", "patch", "update", "watch"]
+# collectorImage default (opentelemetry-collector-k8s) already set by chart.

@@ -1,0 +1,37 @@
+# cert-manager: issues the otel-operator webhook cert in-cluster.
+# CRDs bundled so the Certificate/Issuer kinds exist before consumers sync.
+crds:
+  enabled: true
+  keep: true
+
+# All components pinned to infra-tainted nodes.
+nodeSelector: { node.kubernetes.io/purpose: infra }
+tolerations:
+  - key: node.kubernetes.io/purpose
+    operator: Equal
+    value: infra
+    effect: NoSchedule
+
+webhook:
+  nodeSelector: { node.kubernetes.io/purpose: infra }
+  tolerations:
+    - key: node.kubernetes.io/purpose
+      operator: Equal
+      value: infra
+      effect: NoSchedule
+
+cainjector:
+  nodeSelector: { node.kubernetes.io/purpose: infra }
+  tolerations:
+    - key: node.kubernetes.io/purpose
+      operator: Equal
+      value: infra
+      effect: NoSchedule
+
+startupapicheck:
+  nodeSelector: { node.kubernetes.io/purpose: infra }
+  tolerations:
+    - key: node.kubernetes.io/purpose
+      operator: Equal
+      value: infra
+      effect: NoSchedule

@@ -13,6 +13,20 @@ tempo:
   storage:
     trace:
       backend: s3
+  # Derive RED metrics + service graph from spans, remote_write to Prometheus.
+  metricsGenerator:
+    enabled: true
+    remoteWriteUrl: "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
+    processor:
+      service_graphs: {}
+      span_metrics: {}
+  # Per-tenant switch that actually activates the processors above.
+  overrides:
+    defaults:
+      metrics_generator:
+        processors:
+          - service-graphs
+          - span-metrics
 
 # Tolerate Karpenter disruption like the rest of the monitoring stack.
 tolerations:

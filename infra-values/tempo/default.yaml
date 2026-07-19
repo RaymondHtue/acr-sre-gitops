@@ -20,6 +20,10 @@ tempo:
     processor:
       service_graphs: {}
       span_metrics: {}
+      # Required for TraceQL metrics / Grafana Traces Drilldown.
+      # flush_to_storage pushes local blocks to S3 so queries span history, not just RAM.
+      local_blocks:
+        flush_to_storage: true
   # Per-tenant switch that actually activates the processors above.
   overrides:
     defaults:
@@ -27,6 +31,7 @@ tempo:
         processors:
           - service-graphs
           - span-metrics
+          - local-blocks
 
 # Tolerate Karpenter disruption like the rest of the monitoring stack.
 tolerations:

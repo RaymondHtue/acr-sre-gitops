@@ -1,0 +1,9 @@
+# Provides the OpenTelemetryCollector CRD + controller.
+# No cert-manager  - operator self-signs the webhook cert.
+admissionWebhooks:
+  certManager:
+    enabled: false
+  autoGenerateCert:
+    enabled: true
+
+# collectorImage default (opentelemetry-collector-k8s) already set by chart,

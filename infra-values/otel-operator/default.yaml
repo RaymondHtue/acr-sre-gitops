@@ -7,3 +7,12 @@ admissionWebhooks:
     enabled: true
 
 # collectorImage default (opentelemetry-collector-k8s) already set by chart,
+
+rbac:
+  create: true
+  extraClusterRules:
+    - apiGroups: ["admissionregistration.k8s.io"]
+      resources:
+        - mutatingwebhookconfigurations
+        - validatingwebhookconfigurations
+      verbs: ["get", "list", "patch", "update", "watch"]

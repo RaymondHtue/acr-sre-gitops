@@ -206,7 +206,7 @@ kubectl logs -n kube-system -l app.kubernetes.io/name=karpenter -f --tail=50
 ## Step 7 — Run load generator
 
 ```bash
-kubectl apply -f demo-app/wordload-scaling-testing/load-generator-job.yaml -n testing-dev
+kubectl apply -f demo-app/workload-scaling-testing/load-generator-job.yaml -n testing-dev
 ```
 
 Watch the containers run sequentially:
@@ -297,7 +297,7 @@ If KEDA misbehaves:
 ```bash
 kubectl delete scaledobject nginx-scaledobject -n testing-dev
 kubectl scale deploy nginx-dev -n testing-dev --replicas=1
-kubectl delete -f demo-app/wordload-scaling-testing/load-generator-job.yaml -n testing-dev
+kubectl delete -f demo-app/workload-scaling-testing/load-generator-job.yaml -n testing-dev
 ```
 
 If Karpenter overprovisions:

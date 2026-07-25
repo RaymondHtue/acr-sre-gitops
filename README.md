@@ -1,4 +1,4 @@
-# ACR SRE \- EKS GitOps Infra
+# ACR SRE - EKS GitOps Infra
 
 This repository manages the EKS cluster *accor-resilient-eks-dev* using a GitOps approach. Our ArgoCD ApplicationSet uses a matrix generator to read JSON configurations and automatically deploy the necessary infrastructure via Helm charts.
 
@@ -7,11 +7,11 @@ This repository manages the EKS cluster *accor-resilient-eks-dev* using a GitOps
 
 ## How it works
 
-The *platform-platform-platform-appset.yaml* file acts as the heart of our automation. It uses a matrix generator to coordinate deployments across the environment:
+The `platform-appset.yaml` file acts as the heart of our automation. It uses a matrix generator to coordinate deployments across the environment:
 
-• It identifies configurations from \`infra-configs/common/\*.json\` for global apps or cluster-specific directories for targeted deployments.  
-• Every JSON file defines a Helm application, including its repository, chart version, and destination namespace.  
-• We use a layered values approach, starting with \`default.yaml\` and applying cluster-specific overrides as needed.
+- It identifies configurations from `infra-configs/common/*.json` for global apps or cluster-specific directories for targeted deployments.
+- Every JSON file defines a Helm application, including its repository, chart version, and destination namespace.
+- We use a layered values approach, starting with `default.yaml` and applying cluster-specific overrides as needed.
 
 ## Managed apps
 
@@ -23,34 +23,47 @@ The *platform-platform-platform-appset.yaml* file acts as the heart of our autom
 | keda | keda | https://kedacore.github.io/charts | 2.16.1 | keda |
 | kube-prometheus-stack | kube-prometheus-stack | https://prometheus-community.github.io/helm-charts | 87.10.1 | monitoring |
 | metrics-server | metrics-server | https://kubernetes-sigs.github.io/metrics-server/ | 3.13.1 | kube-system |
+| cert-manager | cert-manager | https://charts.jetstack.io | v1.21.0 | cert-manager |
+| blackbox-exporter | prometheus-blackbox-exporter | https://prometheus-community.github.io/helm-charts | 11.15.1 | monitoring |
+| tempo | tempo | https://grafana.github.io/helm-charts | 1.24.4 | monitoring |
+| opentelemetry-operator | opentelemetry-operator | https://open-telemetry.github.io/opentelemetry-helm-charts | 0.120.0 | opentelemetry-operator-system |
+| fluent-bit | fluent-bit | https://fluent.github.io/helm-charts | 0.57.9 | monitoring |
 
-alb-gateway-config is present but **disabled** (alb-gateway-config.json\_ - trailing underscore keeps it out of the \*.json glob).
+fluent-bit currently ships to a null output - the Loki sink was removed; swap in a real sink when needed (see `infra-values/fluent-bit/default.yaml`).
+
+alb-gateway-config is present but **disabled** (`alb-gateway-config.json_` - trailing underscore keeps it out of the `*.json` glob).
 
 ## Repo layout
 
 ```
-platform-platform-appset.yaml                          # ArgoCD ApplicationSet - the entry point
+platform-appset.yaml                 # ArgoCD ApplicationSet - the entry point
+TEARDOWN-RUNBOOK.md                  # Safe cluster-teardown sequence (finalizer gotchas)
 infra-configs/
   common/*.json                      # Apps deployed to every cluster
   accor-resilient-eks-dev/*.json     # Apps scoped to this cluster only
 infra-values/
   <app>/default.yaml                 # Base Helm values
   <app>/<clusterName>.yaml           # Cluster override values
-demo-app/                           # Scaling/deployment demos (nginx kustomize app, KEDA/Karpenter tests)
+demo-app/
+  demo-nginx-kustomization/          # nginx kustomize base + dev/blue/green overlays
+                                     # (its nginx-appset.yaml is the live demo ApplicationSet)
+  workload-scaling-testing/          # 10x spike test: runbook, load generator, KEDA config
+aws-alb-manifests/                   # Raw ALB Gateway reference manifests
 docs/
   charts/gateway-config/             # Local Helm chart: Gateway + GatewayClass
   notes/alb-gateway-gatewayclass/    # Reference manifests for ALB Gateway setup
-  karpenter-manifests/               # NodePool manifest
+  notes/karpenter/                   # EC2NodeClass/NodePool manifests + setup steps
+  slo/demo-app-slo.md                # SLA/SLO/SLI design for the demo app
 scripts/
   getpods.sh                         # List pods on infra-tainted nodes
-  argo-install.sh                      # One-shot ArgoCD bootstrap into cluster
+  argo-install.sh                    # One-shot ArgoCD bootstrap into cluster
 ```
 
 ## Bootstrap
 
 ```shell
 # 1. Install ArgoCD
-bash argo-install.sh
+bash scripts/argo-install.sh
 
 # 2. Apply the ApplicationSet
 kubectl apply -f platform-appset.yaml
@@ -62,9 +75,9 @@ kubectl -n argocd get secret argocd-initial-admin-secret \
 
 ## Adding an app
 
-1\. Start by creating a new JSON configuration in the appropriate \`infra-configs\` directory.  
-2\. Next, define the Helm values by adding a \`default.yaml\` and any necessary cluster overrides.  
-3\. Once we commit these changes, ArgoCD automatically recognizes and provisions the new application.
+1. Start by creating a new JSON configuration in the appropriate `infra-configs` directory.
+2. Next, define the Helm values by adding a `default.yaml` and any necessary cluster overrides.
+3. Once we commit and push these changes, ArgoCD automatically recognizes and provisions the new application (ApplicationSets track the GitHub remote, not the local checkout).
 
 ## SLA / SLO / SLI (demo-app)
 
@@ -113,7 +126,7 @@ Prometheus scrapes the Probe (via the `release: kube-prometheus-stack` label) an
 
 ## Key details
 
-• Our Karpenter setup is designed to run specifically on nodes marked with the \`infra\` purpose for better resource isolation.  
-• The AWS Load Balancer Controller is configured with the ALB Gateway API enabled, utilizing a dedicated GatewayClass for traffic management.  
-• We use External Secrets Operator to securely connect to AWS Secrets Manager using Pod Identity for a credential-less security model.  
-• For consistency, all applications use automated synchronization with pruning and self-healing enabled.
+- Our Karpenter setup is designed to run specifically on nodes marked with the `infra` purpose for better resource isolation.
+- The AWS Load Balancer Controller is configured with the ALB Gateway API enabled, utilizing a dedicated GatewayClass for traffic management.
+- We use External Secrets Operator to securely connect to AWS Secrets Manager using Pod Identity for a credential-less security model.
+- For consistency, all applications use automated synchronization with pruning and self-healing enabled.

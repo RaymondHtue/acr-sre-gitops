@@ -2,7 +2,7 @@ clusterName: accor-resilient-eks-dev
 serviceAccount:
   create: true
   name: aws-load-balancer-controller
-#vpcId: vpc-0f6821a3a60ab2597
+vpcId: vpc-01cebfe57b9a80316
 
 featureGates:
   ALBGatewayAPI: true

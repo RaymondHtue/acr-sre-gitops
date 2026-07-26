@@ -1,0 +1,40 @@
+# Trace backend for OTLP. S3 storage via Pod Identity, no static AWS keys.
+serviceAccount:
+  create: true
+  # Must match tempo_service_account in acp-aws-eks/us-east-1/dev/s3/terragrunt.hcl
+  name: tempo
+
+# Stateless - trace blocks land in S3, the WAL is transient scratch.
+persistence:
+  enabled: false
+
+# Chart default receivers already expose OTLP on 4317/4318 (plus jaeger/zipkin).
+tempo:
+  storage:
+    trace:
+      backend: s3
+  # Derive RED metrics + service graph from spans, remote_write to Prometheus.
+  metricsGenerator:
+    enabled: true
+    remoteWriteUrl: "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
+    processor:
+      service_graphs: {}
+      span_metrics: {}
+      # Required for TraceQL metrics / Grafana Traces Drilldown.
+      # flush_to_storage pushes local blocks to S3 so queries span history, not just RAM.
+      local_blocks:
+        flush_to_storage: true
+  # Per-tenant switch that actually activates the processors above.
+  overrides:
+    defaults:
+      metrics_generator:
+        processors:
+          - service-graphs
+          - span-metrics
+          - local-blocks
+
+# Tolerate Karpenter disruption like the rest of the monitoring stack.
+tolerations:
+  - key: "karpenter.sh/disruption"
+    operator: "Exists"
+    effect: "NoSchedule"

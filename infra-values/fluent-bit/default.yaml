@@ -1,0 +1,14 @@
+# DaemonSet log shipper. Loki sink removed - logs are discarded until a new
+# backend is wired. No AWS access needed here.
+tolerations:
+  - key: "karpenter.sh/disruption"
+    operator: "Exists"
+    effect: "NoSchedule"
+
+config:
+  # null plugin discards records - avoids the chart-default elasticsearch
+  # output and the removed loki-gateway. Swap in a real sink when ready.
+  outputs: |
+    [OUTPUT]
+        Name null
+        Match *

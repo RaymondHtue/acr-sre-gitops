@@ -1,0 +1,8 @@
+{
+  "appName": "otel-demo",
+  "helmRepo": "https://open-telemetry.github.io/opentelemetry-helm-charts",
+  "chart": "opentelemetry-demo",
+  "targetRevision": "0.40.10",
+  "valuesPath": "infra-values/otel-demo",
+  "namespace": "otel-demo"
+}

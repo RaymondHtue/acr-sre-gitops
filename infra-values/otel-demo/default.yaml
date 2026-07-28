@@ -1,0 +1,12 @@
+# Bundled observability off - platform stack (Tempo, kube-prometheus-stack,
+# otel-operator collector) provides traces/metrics/dashboards.
+opentelemetry-collector:
+  enabled: false
+jaeger:
+  enabled: false
+prometheus:
+  enabled: false
+grafana:
+  enabled: false
+opensearch:
+  enabled: false

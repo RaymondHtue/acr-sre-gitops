@@ -13,7 +13,7 @@ spec:
         generators:
           - git:
               repoURL: https://github.com/RaymondHtue/acr-sre-gitops.git
-              revision: HEAD
+              revision: destroy
               files:
                 - path: "infra-configs/common/*.json"
           - list:
@@ -25,7 +25,7 @@ spec:
         generators:
           - git:
               repoURL: https://github.com/RaymondHtue/acr-sre-gitops.git
-              revision: HEAD
+              revision: destroy
               files:
                 - path: "infra-configs/accor-resilient-eks-dev/*.json"
           - list:
@@ -37,7 +37,7 @@ spec:
 #        generators:
 #          - git:
 #              repoURL: https://github.com/RaymondHtue/acr-sre-gitops.git
-#              revision: HEAD
+#              revision: destroy
 #              files:
 #                - path: "infra-configs/another-cluster/*.json"
 #          - list:
@@ -56,7 +56,7 @@ spec:
 
       sources:
         - repoURL: https://github.com/RaymondHtue/acr-sre-gitops.git
-          targetRevision: HEAD
+          targetRevision: destroy
           ref: gitvalues
 
         - repoURL: '{{.helmRepo}}'

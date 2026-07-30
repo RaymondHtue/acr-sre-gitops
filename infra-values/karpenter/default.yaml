@@ -1,6 +1,6 @@
 # Karpenter Helm values
 # Chart: oci://public.ecr.aws/karpenter/karpenter
-# Version: 1.3.3
+# Version: 1.13.0
 #
 # Pod Identity handles AWS credentials — no serviceAccount.annotations needed.
 # Ensure aws_eks_pod_identity_association exists (managed by karpenter TF module).
@@ -8,7 +8,9 @@
 settings:
   clusterName: accor-resilient-eks-dev
 #  clusterEndpoint: "https://4451DE56AF9D23B7CD641F0BE1C6A320.gr7.us-east-1.eks.amazonaws.com"
-# interruptionQueue: Karpenter-resilient-eks-redemption-dev
+  # SQS queue from the karpenter TF module (enable_spot_termination).
+  # Feeds spot interruption + rebalance events so nodes drain before reclaim.
+  interruptionQueue: Karpenter-accor-resilient-eks-dev
 
 # Run Karpenter controller on tainted infra nodes
 tolerations:

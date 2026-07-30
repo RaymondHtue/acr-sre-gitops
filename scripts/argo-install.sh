@@ -6,4 +6,7 @@ kubectl apply -n argocd --server-side --force-conflicts -f https://raw.githubuse
 kubectl -n argocd patch configmap argocd-cmd-params-cm --type merge -p '{"data":{"server.insecure":"true"}}'
 kubectl -n argocd rollout restart deployment argocd-server
 
+# Expose UI at https://argocd.maunghtoo.cloud via alb-gateway (needs LBC + gateway up).
+kubectl apply -f "$(dirname "$0")/argocd-httproute.yaml"
+
 k -n argocd get secrets argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d; echo

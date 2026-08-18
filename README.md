@@ -25,13 +25,12 @@ The `platform-appset.yaml` file acts as the heart of our automation. It uses a m
 | metrics-server | metrics-server | https://kubernetes-sigs.github.io/metrics-server/ | 3.13.1 | kube-system |
 | cert-manager | cert-manager | https://charts.jetstack.io | v1.21.0 | cert-manager |
 | blackbox-exporter | prometheus-blackbox-exporter | https://prometheus-community.github.io/helm-charts | 11.15.1 | monitoring |
-| tempo | tempo | https://grafana.github.io/helm-charts | 1.24.4 | monitoring |
 | opentelemetry-operator | opentelemetry-operator | https://open-telemetry.github.io/opentelemetry-helm-charts | 0.120.0 | opentelemetry-operator-system |
 | fluent-bit | fluent-bit | https://fluent.github.io/helm-charts | 0.57.9 | monitoring |
 
 fluent-bit currently ships to a null output - the Loki sink was removed; swap in a real sink when needed (see `infra-values/fluent-bit/default.yaml`).
 
-alb-gateway-config is present but **disabled** (`alb-gateway-config.json_` - trailing underscore keeps it out of the `*.json` glob).
+alb-gateway-config and tempo are present but **disabled** (`*.json_` - trailing underscore keeps them out of the `*.json` glob).
 
 ## Repo layout
 
